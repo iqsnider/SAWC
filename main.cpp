@@ -33,7 +33,7 @@ int main() {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
         
-        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         for (int w = 0; w < 100; w++) {
 		for (int h = 0; h < 100; h++) {
 			int dx = 50 - w;
