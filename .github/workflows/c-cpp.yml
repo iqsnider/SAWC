@@ -1,0 +1,27 @@
+name: Meson Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Meson
+      uses: mesonbuild/meson-action@v1
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ninja-build pkg-config
+    
+    - name: Configure
+      run: meson setup builddir --buildtype=debugoptimized
+    
+    - name: Build
+      run: meson compile -C builddir
+    
+    - name: Test
+      run: meson test -C builddir
