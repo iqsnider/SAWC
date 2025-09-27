@@ -8,23 +8,8 @@ struct Vec {
 	double y;
 };
 
-int main() {
-	srand(time(0));
-
-	Vec loc;
-	loc.x = rand();
-	loc.y = rand();
-
-	std::cout << loc.x << std::endl;
-	std::cout << loc.y << std::endl;
-
-	SDL_Init(SDL_INIT_VIDEO);
-	SDL_Window* window = SDL_CreateWindow("Circle", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600,  SDL_WINDOW_ALWAYS_ON_TOP);
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
+void non_terminating_non_avoiding_walk(SDL_Event event, SDL_Renderer* renderer){
 	bool running = true;
-	SDL_Event event;
-
 	while (running) {
         	while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT) running = false;
@@ -46,6 +31,25 @@ int main() {
         
         SDL_RenderPresent(renderer);
     	}
+}
+
+int main() {
+	srand(time(0));
+
+	Vec loc;
+	loc.x = rand();
+	loc.y = rand();
+
+	std::cout << loc.x << std::endl;
+	std::cout << loc.y << std::endl;
+
+	SDL_Init(SDL_INIT_VIDEO);
+	SDL_Window* window = SDL_CreateWindow("Circle", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600,  SDL_WINDOW_ALWAYS_ON_TOP);
+	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
+	SDL_Event event;
+
+	non_terminating_non_avoiding_walk(event, renderer);
     
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
