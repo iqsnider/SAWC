@@ -1,58 +1,128 @@
 #include <iostream>
 #include <cstdlib>
+#include <cmath>
+#include <random>
 #include <ctime>
 #include <SDL2/SDL.h>
 
-struct Vec {
-	double x;
-	double y;
+class RandomWalk {
+public:
+  double radius;
+  double segment_length;
+  int number_of_steps;
+  RandomWalk(double r, double l, double steps);
+  void walk(SDL_Event event, SDL_Window* window, SDL_Renderer* renderer);
+private:
+  double random_pair();
 };
 
-void non_terminating_non_avoiding_walk(SDL_Event event, SDL_Renderer* renderer){
-	bool running = true;
-	while (running) {
-        	while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT) running = false;
-        	}
-        
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderClear(renderer);
-        
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        for (int w = 0; w < 100; w++) {
-		for (int h = 0; h < 100; h++) {
-			int dx = 50 - w;
-			int dy = 50 - h;
-			if ((dx*dx + dy*dy) <= (50*50)) {
-				SDL_RenderDrawPoint(renderer, 350 + dx, 250 + dy);
-			}
-		}
-        }
-        
-        SDL_RenderPresent(renderer);
-    	}
+RandomWalk::RandomWalk(double r, double l, double steps) {
+  radius = r;
+  segment_length = l;
+  number_of_steps = steps;
+}
+
+// return random (r, theta) pair
+double RandomWalk::random_pair(){
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  const double TWO_PI = 2.0 * M_PI;
+  std::uniform_real_distribution<> dis(0.0, TWO_PI);
+
+  double random_theta = dis(gen);
+  
+  return random_theta;
+}
+
+// A random walk where the next point is defined as a radius r and angle theta from the previous point. Non-avoiding except for boundaries.
+void RandomWalk::walk(SDL_Event event, SDL_Window* window, SDL_Renderer* renderer){
+  int windowWidth, windowHeight;
+  SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+  int centerX = windowWidth/2;
+  int centerY = windowHeight/2;
+
+  // do the random walk
+  // initialize:
+  double prev_x = 0;
+  double prev_y = 0;
+  double points[number_of_steps][2];
+  for (int iter = 0; iter < number_of_steps; iter++) {
+    double theta = random_pair();
+    double x = prev_x + segment_length*cos(theta);
+    double y = prev_y + segment_length*sin(theta);
+    double r = sqrt(x*x + y*y);
+    // while (r >= radius) {
+    //   double theta = random_pair();
+    //   double x = prev_x + segment_length*cos(theta);
+    //   double y = prev_y + segment_length*sin(theta);
+    //   double r = sqrt(x*x + y*y);
+    // }
+
+    // convert points to screen coordinates
+    int i = static_cast<int>(x + centerX);
+    int j = static_cast<int>(y + centerY);
+    printf(" (%d, %d)", i, j);
+
+    
+    points[iter][0] = i;
+    points[iter][1] = j;
+
+    // each point is calculated in relation to the previous point --> walk
+    prev_x = x;
+    prev_y = y;
+  }
+
+  bool running = true;
+
+  while (running) {
+    while (SDL_PollEvent(&event)) {
+      if (event.type == SDL_QUIT) running = false;
+    }
+
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+    SDL_RenderDrawPoint(renderer, centerX, centerY);
+    
+    // draw circle boundary
+    for (int i = 0; i < windowWidth; i++) {
+      for (int j = 0; j < windowHeight; j++) {
+	double x = static_cast<double>(i - centerX);
+	double y = static_cast<double>(j - centerY);
+	double r = sqrt(x*x + y*y);
+	if (r > radius - radius/100 && r < radius + radius/100) {
+	  SDL_RenderDrawPoint(renderer, i, j);
+	}
+      }
+    }
+
+    // draw random walk points
+    for (int i = 0; i < number_of_steps; i++) {
+      SDL_RenderDrawPoint(renderer, points[i][0], points[i][1]);
+      if (i != 0) {
+	SDL_RenderDrawLine(renderer, points[i-1][0], points[i-1][1], points[i][0], points[i][1]);
+      }
+    }
+    SDL_RenderPresent(renderer);
+  }
 }
 
 int main() {
-	srand(time(0));
+  srand(time(0));
 
-	Vec loc;
-	loc.x = rand();
-	loc.y = rand();
+  SDL_Init(SDL_INIT_VIDEO);
+  SDL_Window* window = SDL_CreateWindow("Circle", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600,  SDL_WINDOW_ALWAYS_ON_TOP);
+  SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+  SDL_Event event;
 
-	std::cout << loc.x << std::endl;
-	std::cout << loc.y << std::endl;
 
-	SDL_Init(SDL_INIT_VIDEO);
-	SDL_Window* window = SDL_CreateWindow("Circle", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600,  SDL_WINDOW_ALWAYS_ON_TOP);
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+  RandomWalk new_walk(200, 20, 100);
+  new_walk.walk(event, window, renderer);
 
-	SDL_Event event;
-
-	non_terminating_non_avoiding_walk(event, renderer);
-    
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
-	return 0;
+  SDL_DestroyRenderer(renderer);
+  SDL_DestroyWindow(window);
+  SDL_Quit();
+  return 0;
 }
