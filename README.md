@@ -7,23 +7,23 @@ Self-Avoiding Walk in a Circle
 ## Sitting bored in class
 "_If I make a circle (or an ellipse) and I start drawing a line at a random point within that circle and control the direction by randomly change the angle of the direction the line is drawn (with saturation and smoothing constraints obviously) and constrain the drawn line to never cross itself or the circle, where will the end of the line converge to? Or how long does it take to converge (to within some tolerance) given velocity of the line drawn and the constraint boundary conditions. What if we allow 1 cross? What if we allow N crosses?_"
 
-# Self-Avoiding to be added as soon as possible
+## Self-Avoiding to be added as soon as possible
 ![Alt text](docs/nonSAWC.png)
 
 ## Building (macOS)
 
-# Install dependencies
+### Install dependencies
 ```bash
 brew install meson ninja sdl2
 ```
 
-# Build
+### Build
 ```bash
 meson setup build
 ninja -C build
 ```
 
-# Run
+### Run
 ```bash
 ./build/walk
 ```
