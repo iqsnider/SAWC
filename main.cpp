@@ -51,18 +51,16 @@ void RandomWalk::walk(SDL_Event event, SDL_Window* window, SDL_Renderer* rendere
     double x = prev_x + segment_length*cos(theta);
     double y = prev_y + segment_length*sin(theta);
     double r = sqrt(x*x + y*y);
-    // while (r >= radius) {
-    //   double theta = random_pair();
-    //   double x = prev_x + segment_length*cos(theta);
-    //   double y = prev_y + segment_length*sin(theta);
-    //   double r = sqrt(x*x + y*y);
-    // }
+    while (r >= radius) {
+      theta = random_pair();
+      x = prev_x + segment_length*cos(theta);
+      y = prev_y + segment_length*sin(theta);
+      r = sqrt(x*x + y*y);
+    }
 
     // convert points to screen coordinates
     int i = static_cast<int>(x + centerX);
     int j = static_cast<int>(y + centerY);
-    printf(" (%d, %d)", i, j);
-
     
     points[iter][0] = i;
     points[iter][1] = j;
