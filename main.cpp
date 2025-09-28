@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
+#include <vector>
 #include <random>
 #include <ctime>
 #include <SDL2/SDL.h>
@@ -11,9 +12,10 @@ public:
   double segment_length;
   int number_of_steps;
   RandomWalk(double r, double l, double steps);
-  void walk(SDL_Event event, SDL_Window* window, SDL_Renderer* renderer);
+  void render_walk(SDL_Event event, SDL_Window* window, SDL_Renderer* renderer);
 private:
   double random_pair();
+  std::vector<std::vector<int>> basic_walk(SDL_Window* window);
 };
 
 RandomWalk::RandomWalk(double r, double l, double steps) {
@@ -34,18 +36,16 @@ double RandomWalk::random_pair(){
   return random_theta;
 }
 
-// A random walk where the next point is defined as a radius r and angle theta from the previous point. Non-avoiding except for boundaries.
-void RandomWalk::walk(SDL_Event event, SDL_Window* window, SDL_Renderer* renderer){
+std::vector<std::vector<int>> RandomWalk::basic_walk(SDL_Window* window) {
   int windowWidth, windowHeight;
   SDL_GetWindowSize(window, &windowWidth, &windowHeight);
   int centerX = windowWidth/2;
   int centerY = windowHeight/2;
-
   // do the random walk
   // initialize:
   double prev_x = 0;
   double prev_y = 0;
-  double points[number_of_steps][2];
+  std::vector<std::vector<int>> points;
   for (int iter = 0; iter < number_of_steps; iter++) {
     double theta = random_pair();
     double x = prev_x + segment_length*cos(theta);
@@ -62,13 +62,25 @@ void RandomWalk::walk(SDL_Event event, SDL_Window* window, SDL_Renderer* rendere
     int i = static_cast<int>(x + centerX);
     int j = static_cast<int>(y + centerY);
     
-    points[iter][0] = i;
-    points[iter][1] = j;
+    points.push_back({i, j});
 
     // each point is calculated in relation to the previous point --> walk
     prev_x = x;
     prev_y = y;
   }
+
+  return points;
+}
+
+// A random walk where the next point is defined as a radius r and angle theta from the previous point. Non-avoiding except for boundaries.
+void RandomWalk::render_walk(SDL_Event event, SDL_Window* window, SDL_Renderer* renderer){
+  int windowWidth, windowHeight;
+  SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+  int centerX = windowWidth/2;
+  int centerY = windowHeight/2;
+
+  std::vector<std::vector<int>> points = basic_walk(window);
+
 
   bool running = true;
 
@@ -116,8 +128,8 @@ int main() {
   SDL_Event event;
 
 
-  RandomWalk new_walk(200, 20, 100);
-  new_walk.walk(event, window, renderer);
+  RandomWalk new_walk(200, 20, 1000);
+  new_walk.render_walk(event, window, renderer);
 
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
