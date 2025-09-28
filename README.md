@@ -1,5 +1,6 @@
 # SAWC
 [![Build](https://github.com/iqsnider/SAWC/actions/workflows/ci.yml/badge.svg)](https://github.com/iqsnider/SAWC/actions/workflows/ci.yml)
+
 Self-Avoiding Walk in a Circle
 
 ## Sitting bored in class
