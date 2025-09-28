@@ -15,6 +15,8 @@ public:
   int number_of_steps;
   RandomWalk(double r, double l, double steps);
   void walk(SDL_Event event, SDL_Window* window, SDL_Renderer* renderer);
+private:
+  double random_pair();
 };
 
 RandomWalk::RandomWalk(double r, double l, double steps) {
@@ -23,32 +25,44 @@ RandomWalk::RandomWalk(double r, double l, double steps) {
   number_of_steps = steps;
 }
 
+// return random (r, theta) pair
+double RandomWalk::random_pair(){
+  return 0;
+}
+
 // A random walk where the next point is defined as a radius r and angle theta from the previous point. Non-avoiding except for boundaries.
 void RandomWalk::walk(SDL_Event event, SDL_Window* window, SDL_Renderer* renderer){
   int windowWidth, windowHeight;
   SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+  int centerX = windowWidth/2;
+  int centerY = windowHeight/2;
+
   bool running = true;
 
   while (running) {
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_QUIT) running = false;
     }
-  
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-  SDL_RenderClear(renderer);
-  
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-  for (int w = 0; w < 100; w++) {
-    for (int h = 0; h < 100; h++) {
-      int dx = 50 - w;
-      int dy = 50 - h;
-      if ((dx*dx + dy*dy) <= (50*50)) {
-	SDL_RenderDrawPoint(renderer, 350 + dx, 250 + dy);
+
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+    SDL_RenderDrawPoint(renderer, centerX, centerY);
+    
+    for (int i = 0; i < windowWidth; i++) {
+      for (int j = 0; j < windowHeight; j++) {
+	double x = static_cast<double>(i - centerX);
+	double y = static_cast<double>(j - centerY);
+	double r = sqrt(x*x + y*y);
+	if (r > radius - 1 && r < radius + 1) {
+	  SDL_RenderDrawPoint(renderer, i, j);
+	}
       }
     }
-  }
-  
-  SDL_RenderPresent(renderer);
+
+    SDL_RenderPresent(renderer);
   }
 }
 
@@ -68,7 +82,7 @@ int main() {
   SDL_Event event;
 
 
-  RandomWalk new_walk(1000, 1, 10);
+  RandomWalk new_walk(200, 1, 10);
   new_walk.walk(event, window, renderer);
 
   SDL_DestroyRenderer(renderer);
