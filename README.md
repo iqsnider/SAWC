@@ -1,4 +1,5 @@
 # SAWC
+[![Build](https://github.com/iqsnider/SAWC/actions/workflows/ci.yml/badge.svg)](https://github.com/iqsnider/SAWC/actions/workflows/ci.yml)
 Self-Avoiding Walk in a Circle
 
 ## Sitting bored in class
@@ -6,13 +7,18 @@ Self-Avoiding Walk in a Circle
 
 ## Building (macOS)
 
-```bash
 # Install dependencies
+```bash
 brew install meson ninja sdl2
+```
 
 # Build
+```bash
 meson setup build
 ninja -C build
+```
 
 # Run
+```bash
 ./build/walk
+```
