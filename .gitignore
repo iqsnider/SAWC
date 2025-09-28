@@ -44,3 +44,6 @@ builddir
 # build directories
 build/
 .cache/
+
+# macos
+.DS_Store
