@@ -14,7 +14,7 @@ public:
   double segment_length;
   int number_of_steps;
   RandomWalk(double r, double l, double steps);
-  void walk(SDL_Event event, SDL_Renderer* renderer);
+  void walk(SDL_Event event, SDL_Window* window, SDL_Renderer* renderer);
 };
 
 RandomWalk::RandomWalk(double r, double l, double steps) {
@@ -24,8 +24,11 @@ RandomWalk::RandomWalk(double r, double l, double steps) {
 }
 
 // A random walk where the next point is defined as a radius r and angle theta from the previous point. Non-avoiding except for boundaries.
-void RandomWalk::walk(SDL_Event event, SDL_Renderer* renderer){
+void RandomWalk::walk(SDL_Event event, SDL_Window* window, SDL_Renderer* renderer){
+  int windowWidth, windowHeight;
+  SDL_GetWindowSize(window, &windowWidth, &windowHeight);
   bool running = true;
+
   while (running) {
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_QUIT) running = false;
@@ -62,11 +65,11 @@ int main() {
   SDL_Init(SDL_INIT_VIDEO);
   SDL_Window* window = SDL_CreateWindow("Circle", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600,  SDL_WINDOW_ALWAYS_ON_TOP);
   SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
   SDL_Event event;
 
+
   RandomWalk new_walk(1000, 1, 10);
-  new_walk.walk(event, renderer);
+  new_walk.walk(event, window, renderer);
 
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
