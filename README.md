@@ -1,7 +1,7 @@
 <h1 align="center">
-  <img src="./assets/sparkles.webp" alt="✨" width="33"/>
+  <img src="./docs/assets/sparkles.webp" alt="✨" width="33"/>
   SAWC
-  <img src="./assets/sparkles.webp" alt="✨" width="33"/>
+  <img src="./docs/assets/sparkles.webp" alt="✨" width="33"/>
 </h1>
 
 [![Build](https://github.com/iqsnider/SAWC/actions/workflows/ci.yml/badge.svg)](https://github.com/iqsnider/SAWC/actions/workflows/ci.yml)
