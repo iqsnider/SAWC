@@ -40,3 +40,7 @@ builddir
 
 # debug information files
 *.dwo
+
+# build directories
+build/
+.cache/
