@@ -1,6 +1,5 @@
 #include "walk.h"
 #include <SDL2/SDL.h>
-#include <iostream>
 
 int main() {
   srand(time(0));
@@ -11,7 +10,7 @@ int main() {
   SDL_Event event;
 
   RandomWalk new_walk(200, 20, 2000);
-  new_walk.render_walk(event, window, renderer);
+  new_walk.render_basic_walk(event, window, renderer);
 
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
