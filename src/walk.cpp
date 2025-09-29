@@ -109,6 +109,7 @@ void RandomWalk::render_basic_walk(SDL_Event event, SDL_Window* window, SDL_Rend
   }
 }
 
+// Self-avoiding logic. When a new node is calculated, intersection is checked for all previous segments.
 std::vector<std::vector<int>> RandomWalk::self_avoiding_walk(SDL_Window* window) {
   int windowWidth, windowHeight;
   SDL_GetWindowSize(window, &windowWidth, &windowHeight);
@@ -118,24 +119,108 @@ std::vector<std::vector<int>> RandomWalk::self_avoiding_walk(SDL_Window* window)
   // initialize:
   double prev_x = 0;
   double prev_y = 0;
+  std::vector<std::vector<double>> coordinates; // double vector for storing raw math values
   std::vector<std::vector<int>> points;
   for (int iter = 0; iter < number_of_steps; iter++) {
     double theta = random_pair();
     double x = prev_x + segment_length*cos(theta);
     double y = prev_y + segment_length*sin(theta);
     double r = sqrt(x*x + y*y);
-    while (r >= radius) {
+    bool self_avoided = false;
+    bool stuck = false; // flag for convergence, segment is too tightly wound
+    int stuck_limit = 1000000; // limit for number of trials before concluding that segment is stuck
+    // constrain added points to the circle boundary
+    while (r >= radius && iter >= 0 && iter <= 2) {
       theta = random_pair();
       x = prev_x + segment_length*cos(theta);
       y = prev_y + segment_length*sin(theta);
       r = sqrt(x*x + y*y);
     }
+    // constrain added points by the self-avoiding intersection condition
+    if (iter > 2) {
+      int fails = 0;
+      while (self_avoided == false) {
+	// constrain added points to the circle boundary
+	while (r >= radius) {
+	  theta = random_pair();
+	  x = prev_x + segment_length*cos(theta);
+	  y = prev_y + segment_length*sin(theta);
+	  r = sqrt(x*x + y*y);
+	}
 
+	// handle vertical segments
+	bool cur_vertical = (x == prev_x);
+	// slope and intercept
+	double cur_A = cur_vertical ? 0.0 : (y - prev_y)/(x - prev_x);
+	double cur_B = prev_y - cur_A*prev_x;
+	for (int k = 0; k < iter - 1; k++) {
+	  double test_x1 = coordinates[k][0];
+	  double test_y1 = coordinates[k][1];
+	  double test_x2 = coordinates[k+1][0];
+	  double test_y2 = coordinates[k+1][1];
+
+	  // handle vertical segments safely
+	  bool test_vertical = (test_x1 == test_x2);
+
+	  // slope and intercept
+	  double test_A = test_vertical ? 0.0 : (test_y2 - test_y1)/(test_x2 - test_x1);
+	  double test_B = test_y1 - test_A*test_x1;
+	
+	  // if slopes are equal, skip (parallel lines)
+	  if (!cur_vertical && !test_vertical && fabs(test_A - cur_A) < 1e-9) {
+	    self_avoided = true;
+	    continue;
+	  }
+
+	  // calculate intersection point
+	  double intersection_x, intersection_y;
+	  if (cur_vertical) {
+	      intersection_x = x;
+	      intersection_y = test_A * x + test_B;
+	  } else if (test_vertical) {
+	      intersection_x = test_x1;
+	      intersection_y = cur_A * intersection_x + cur_B;
+	  } else {
+	      intersection_x = (cur_B - test_B)/(test_A - cur_A);
+	      intersection_y = cur_A * intersection_x + cur_B;
+	  }
+
+	  // check if intersection lies within both segments
+	  if (intersection_x >= std::min(test_x1,test_x2) &&
+	      intersection_x <= std::max(test_x1,test_x2) &&
+	      intersection_y >= std::min(test_y1,test_y2) &&
+	      intersection_y <= std::max(test_y1,test_y2)) {
+	      self_avoided = false;
+	      break;
+	  } else {
+	    self_avoided = true;
+	  }
+	}
+	if (self_avoided == false) {
+	  theta = random_pair();
+	  x = prev_x + segment_length*cos(theta);
+	  y = prev_y + segment_length*sin(theta);
+	  r = sqrt(x*x + y*y);
+	  fails++;
+	  if (fails == stuck_limit) {
+	    stuck = true;
+	  }
+	}
+	if (stuck == true) {
+	  break;
+	}
+       }
+     }
+
+    if (stuck == true) {
+      break;
+    }
     // convert points to screen coordinates
     int i = static_cast<int>(x + centerX);
     int j = static_cast<int>(y + centerY);
     
     points.push_back({i, j});
+    coordinates.push_back({x, y});
 
     // each point is calculated in relation to the previous point --> walk
     prev_x = x;
@@ -181,10 +266,10 @@ void RandomWalk::render_self_avoiding_walk(SDL_Event event, SDL_Window* window, 
     }
 
     // draw random walk points
-    for (int i = 0; i < number_of_steps; i++) {
-      int color_val = i*255/number_of_steps;
-      int val_color = number_of_steps*255/i;
-      SDL_SetRenderDrawColor(renderer, color_val, color_val, color_val, 255);
+    for (int i = 0; i < points.size(); i++) {
+      // int color_val = i*255/points.size();
+      // int val_color = points.size()*255/i;
+      // SDL_SetRenderDrawColor(renderer, color_val, color_val, color_val, 255);
       SDL_RenderDrawPoint(renderer, points[i][0], points[i][1]);
       if (i != 0) {
 	SDL_RenderDrawLine(renderer, points[i-1][0], points[i-1][1], points[i][0], points[i][1]);
