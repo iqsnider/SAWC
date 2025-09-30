@@ -24,6 +24,22 @@ double RandomWalk::random_pair(){
   return random_theta;
 }
 
+// basically a smoothing operator
+double RandomWalk::random_angle_directed(std::vector<std::vector<double>> vec) {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+
+  double dx = vec[vec.size()-1][0] - vec[vec.size()-2][0];
+  double dy = vec[vec.size()-1][1] - vec[vec.size()-2][1];
+  double theta_operator = atan(dy/dx);
+
+  const double TWO_PI = 2.0 * M_PI;
+  std::uniform_real_distribution<> dis(theta_operator, TWO_PI - theta_operator);
+  double random_theta = dis(gen);
+  
+  return random_theta;
+}
+
 std::vector<std::vector<int>> RandomWalk::basic_walk(SDL_Window* window) {
   int windowWidth, windowHeight;
   SDL_GetWindowSize(window, &windowWidth, &windowHeight);
@@ -142,7 +158,7 @@ std::vector<std::vector<int>> RandomWalk::self_avoiding_walk(SDL_Window* window)
       while (self_avoided == false) {
 	// constrain added points to the circle boundary
 	while (r >= radius) {
-	  theta = random_pair();
+	  theta = random_angle_directed(coordinates);
 	  x = prev_x + segment_length*cos(theta);
 	  y = prev_y + segment_length*sin(theta);
 	  r = sqrt(x*x + y*y);
@@ -197,7 +213,7 @@ std::vector<std::vector<int>> RandomWalk::self_avoiding_walk(SDL_Window* window)
 	  }
 	}
 	if (self_avoided == false) {
-	  theta = random_pair();
+	  theta = random_angle_directed(coordinates);
 	  x = prev_x + segment_length*cos(theta);
 	  y = prev_y + segment_length*sin(theta);
 	  r = sqrt(x*x + y*y);

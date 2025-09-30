@@ -13,6 +13,7 @@ public:
   void render_self_avoiding_walk(SDL_Event event, SDL_Window* window, SDL_Renderer* renderer);
 private:
   double random_pair();
+  double random_angle_directed(std::vector<std::vector<double>> vec);
   std::vector<std::vector<int>> basic_walk(SDL_Window* window);
   std::vector<std::vector<int>> self_avoiding_walk(SDL_Window* window);
 };
