@@ -11,21 +11,17 @@ double RandomWalk::random_angle_directed(const std::vector<std::vector<double>>&
   if (vec.size() < 2) {
       return random_angle();
   }
-
   double dx = vec.back()[0] - vec[vec.size()-2][0];
   double dy = vec.back()[1] - vec[vec.size()-2][1];
   double prev_angle = atan2(dy, dx);
 
   static std::mt19937 gen(std::random_device{}());
   std::uniform_real_distribution<> half_dis(-M_PI/2.0, M_PI/2.0);
-
-  // Random offset in [-π/2, +π/2]
   double offset = half_dis(gen);
 
-  // Allowed angle = forward half-plane around prev_angle
   double theta = prev_angle + offset;
 
-  // Normalize into [0, 2π)
+  // normalize into [0, 2pi)
   auto norm = [](double a) {
       const double TWO_PI = 2.0*M_PI;
       a = fmod(a, TWO_PI);
