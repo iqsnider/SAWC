@@ -16,8 +16,8 @@ double RandomWalk::random_angle_directed(const std::vector<std::vector<double>>&
   double prev_angle = atan2(dy, dx);
 
   static std::mt19937 gen(std::random_device{}());
-  std::uniform_real_distribution<> half_dis(-M_PI/2.0, M_PI/2.0);
-  double offset = half_dis(gen);
+  std::uniform_real_distribution<> dis(-M_PI/2, M_PI/2);
+  double offset = dis(gen);
 
   double theta = prev_angle + offset;
 
@@ -52,7 +52,7 @@ std::vector<std::vector<int>> RandomWalk::self_avoiding_walk(SDL_Window* window)
     double r = sqrt(x*x + y*y);
     bool self_avoided = false;
     bool stuck = false; // flag for convergence, segment is too tightly wound
-    int stuck_limit = 1000000; // limit for number of trials before concluding that segment is stuck
+    int stuck_limit = 5000000; // limit for number of trials before concluding that segment is stuck
     // constrain added points to the circle boundary
     while (r >= radius && iter >= 0 && iter <= 2) {
       theta = random_angle_directed(coordinates);
