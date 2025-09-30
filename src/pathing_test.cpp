@@ -7,70 +7,34 @@
 #include <SDL2/SDL.h>
 
 // angle testing
-// double RandomWalk::random_angle_test(std::vector<std::vector<double>> vec) {
-//   std::random_device rd;
-//   std::mt19937 gen(rd());
-//
-//   double dx = vec[vec.size()-1][0] - vec[vec.size()-2][0];
-//   double dy = vec[vec.size()-1][1] - vec[vec.size()-2][1];
-//   double theta_operator = atan2(dy/dx);
-//
-//   const double TWO_PI = 2.0 * M_PI;
-//   std::uniform_real_distribution<> dis(theta_operator, TWO_PI - theta_operator);
-//   double random_theta = dis(gen);
-//
-//   return random_theta;
-// }
-
 double RandomWalk::random_angle_test(const std::vector<std::vector<double>>& vec) {
   if (vec.size() < 2) {
-    return random_angle();
+      return random_angle();
   }
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  const double TWO_PI = 2.0 * M_PI;
 
-  double dx = vec[vec.size()-1][0] - vec[vec.size()-2][0];
-  double dy = vec[vec.size()-1][1] - vec[vec.size()-2][1];
+  double dx = vec.back()[0] - vec[vec.size()-2][0];
+  double dy = vec.back()[1] - vec[vec.size()-2][1];
   double prev_angle = atan2(dy, dx);
 
+  static std::mt19937 gen(std::random_device{}());
+  std::uniform_real_distribution<> half_dis(-M_PI/2.0, M_PI/2.0);
 
-  // Allowed range is prev_angle + 90 degrees --> prev_angle + 270 degrees
-  double min_angle = prev_angle + M_PI/2.0;
-  double max_angle = prev_angle + 3.0*M_PI/2.0;
+  // Random offset in [-π/2, +π/2]
+  double offset = half_dis(gen);
 
-  // Normalize into [0, 2pi)
-  auto norm = [TWO_PI](double a) {
-      while (a < 0) a += TWO_PI;
-      while (a >= TWO_PI) a -= TWO_PI;
+  // Allowed angle = forward half-plane around prev_angle
+  double theta = prev_angle + offset;
+
+  // Normalize into [0, 2π)
+  auto norm = [](double a) {
+      const double TWO_PI = 2.0*M_PI;
+      a = fmod(a, TWO_PI);
+      if (a < 0) a += TWO_PI;
       return a;
   };
-
-  min_angle = norm(min_angle);
-  max_angle = norm(max_angle);
-
-  // If min < max, one clean interval
-  // If wrap-around, need to choose from [0,max] or [min,2pi]
-  std::uniform_real_distribution<> dis(0.0, 1.0);
-  double r = dis(gen);
-
-  double theta;
-  if (min_angle < max_angle) {
-      std::uniform_real_distribution<> dist(min_angle, max_angle);
-      theta = dist(gen);
-  } else {
-      // Wrapped case: pick in [0,max] or [min,2pi]
-      if (r < 0.5) {
-	  std::uniform_real_distribution<> dist(0.0, max_angle);
-	  theta = dist(gen);
-      } else {
-	  std::uniform_real_distribution<> dist(min_angle, TWO_PI);
-	  theta = dist(gen);
-      }
-  }
-
-  return theta;
+  return norm(theta);
 }
+
 // random walk pathing constraint testing
 std::vector<std::vector<int>> RandomWalk::test_walk(SDL_Window* window) {
   int windowWidth, windowHeight;
