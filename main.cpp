@@ -10,7 +10,7 @@ int main() {
   SDL_Event event;
 
   RandomWalk new_walk(200, 20, 100);
-  new_walk.render_self_avoiding_walk(event, window, renderer);
+  new_walk.render_test_walk(event, window, renderer);
 
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);

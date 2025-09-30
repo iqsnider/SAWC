@@ -35,7 +35,7 @@ std::vector<std::vector<int>> RandomWalk::self_avoiding_walk(SDL_Window* window)
   std::vector<std::vector<double>> coordinates; // double vector for storing raw math values
   std::vector<std::vector<int>> points;
   for (int iter = 0; iter < number_of_steps; iter++) {
-    double theta = random_pair();
+    double theta = random_angle();
     double x = prev_x + segment_length*cos(theta);
     double y = prev_y + segment_length*sin(theta);
     double r = sqrt(x*x + y*y);
@@ -44,7 +44,7 @@ std::vector<std::vector<int>> RandomWalk::self_avoiding_walk(SDL_Window* window)
     int stuck_limit = 1000000; // limit for number of trials before concluding that segment is stuck
     // constrain added points to the circle boundary
     while (r >= radius && iter >= 0 && iter <= 2) {
-      theta = random_pair();
+      theta = random_angle();
       x = prev_x + segment_length*cos(theta);
       y = prev_y + segment_length*sin(theta);
       r = sqrt(x*x + y*y);

@@ -12,8 +12,8 @@ RandomWalk::RandomWalk(double r, double l, int steps) {
   number_of_steps = steps;
 }
 
-// return random (r, theta) pair
-double RandomWalk::random_pair(){
+// return random angle
+double RandomWalk::random_angle(){
   std::random_device rd;
   std::mt19937 gen(rd());
   const double TWO_PI = 2.0 * M_PI;
@@ -36,12 +36,12 @@ std::vector<std::vector<int>> RandomWalk::basic_walk(SDL_Window* window) {
   double prev_y = 0;
   std::vector<std::vector<int>> points;
   for (int iter = 0; iter < number_of_steps; iter++) {
-    double theta = random_pair();
+    double theta = random_angle();
     double x = prev_x + segment_length*cos(theta);
     double y = prev_y + segment_length*sin(theta);
     double r = sqrt(x*x + y*y);
     while (r >= radius) {
-      theta = random_pair();
+      theta = random_angle();
       x = prev_x + segment_length*cos(theta);
       y = prev_y + segment_length*sin(theta);
       r = sqrt(x*x + y*y);
