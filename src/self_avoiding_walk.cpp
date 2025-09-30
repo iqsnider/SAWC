@@ -195,9 +195,9 @@ void RandomWalk::render_self_avoiding_walk(SDL_Event event, SDL_Window* window, 
 
     // draw random walk points
     for (auto i = 0u; i < points.size(); i++) {
-      // int color_val = i*255/points.size();
-      // int val_color = points.size()*255/i;
-      // SDL_SetRenderDrawColor(renderer, color_val, color_val, color_val, 255);
+      int color_val = i*255/points.size();
+      int val_color = points.size()*255/i;
+      SDL_SetRenderDrawColor(renderer, color_val, color_val, 255, 255);
       SDL_RenderDrawPoint(renderer, points[i][0], points[i][1]);
       if (i != 0) {
 	SDL_RenderDrawLine(renderer, points[i-1][0], points[i-1][1], points[i][0], points[i][1]);
