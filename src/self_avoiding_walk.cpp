@@ -7,19 +7,32 @@
 #include <SDL2/SDL.h>
 
 // basically a smoothing operator
-double RandomWalk::random_angle_directed(std::vector<std::vector<double>> vec) {
-  std::random_device rd;
-  std::mt19937 gen(rd());
+double RandomWalk::random_angle_directed(const std::vector<std::vector<double>>& vec) {
+  if (vec.size() < 2) {
+      return random_angle();
+  }
 
-  double dx = vec[vec.size()-1][0] - vec[vec.size()-2][0];
-  double dy = vec[vec.size()-1][1] - vec[vec.size()-2][1];
-  double theta_operator = atan(dy/dx);
+  double dx = vec.back()[0] - vec[vec.size()-2][0];
+  double dy = vec.back()[1] - vec[vec.size()-2][1];
+  double prev_angle = atan2(dy, dx);
 
-  const double TWO_PI = 2.0 * M_PI;
-  std::uniform_real_distribution<> dis(theta_operator, TWO_PI - theta_operator);
-  double random_theta = dis(gen);
-  
-  return random_theta;
+  static std::mt19937 gen(std::random_device{}());
+  std::uniform_real_distribution<> half_dis(-M_PI/2.0, M_PI/2.0);
+
+  // Random offset in [-π/2, +π/2]
+  double offset = half_dis(gen);
+
+  // Allowed angle = forward half-plane around prev_angle
+  double theta = prev_angle + offset;
+
+  // Normalize into [0, 2π)
+  auto norm = [](double a) {
+      const double TWO_PI = 2.0*M_PI;
+      a = fmod(a, TWO_PI);
+      if (a < 0) a += TWO_PI;
+      return a;
+  };
+  return norm(theta);
 }
 
 // Self-avoiding logic. When a new node is calculated, intersection is checked for all previous segments.
@@ -34,6 +47,8 @@ std::vector<std::vector<int>> RandomWalk::self_avoiding_walk(SDL_Window* window)
   double prev_y = 0;
   std::vector<std::vector<double>> coordinates; // double vector for storing raw math values
   std::vector<std::vector<int>> points;
+  coordinates.push_back({prev_x, prev_y});
+  points.push_back({static_cast<int>(centerX), static_cast<int>(centerY)});
   for (int iter = 0; iter < number_of_steps; iter++) {
     double theta = random_angle();
     double x = prev_x + segment_length*cos(theta);

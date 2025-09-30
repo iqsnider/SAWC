@@ -14,7 +14,7 @@ public:
   void render_test_walk(SDL_Event event, SDL_Window* window, SDL_Renderer* renderer);
 private:
   double random_angle();
-  double random_angle_directed(std::vector<std::vector<double>> vec);
+  double random_angle_directed(const std::vector<std::vector<double>>& vec);
   double random_angle_test(const std::vector<std::vector<double>>& vec);
   std::vector<std::vector<int>> basic_walk(SDL_Window* window);
   std::vector<std::vector<int>> self_avoiding_walk(SDL_Window* window);
