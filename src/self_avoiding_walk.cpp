@@ -50,7 +50,7 @@ std::vector<std::vector<int>> RandomWalk::self_avoiding_walk(SDL_Window* window)
   coordinates.push_back({prev_x, prev_y});
   points.push_back({static_cast<int>(centerX), static_cast<int>(centerY)});
   for (int iter = 0; iter < number_of_steps; iter++) {
-    double theta = random_angle();
+    double theta = random_angle_directed(coordinates);
     double x = prev_x + segment_length*cos(theta);
     double y = prev_y + segment_length*sin(theta);
     double r = sqrt(x*x + y*y);
@@ -59,7 +59,7 @@ std::vector<std::vector<int>> RandomWalk::self_avoiding_walk(SDL_Window* window)
     int stuck_limit = 1000000; // limit for number of trials before concluding that segment is stuck
     // constrain added points to the circle boundary
     while (r >= radius && iter >= 0 && iter <= 2) {
-      theta = random_angle();
+      theta = random_angle_directed(coordinates);
       x = prev_x + segment_length*cos(theta);
       y = prev_y + segment_length*sin(theta);
       r = sqrt(x*x + y*y);
@@ -194,7 +194,7 @@ void RandomWalk::render_self_avoiding_walk(SDL_Event event, SDL_Window* window, 
     }
 
     // draw random walk points
-    for (int i = 0; i < points.size(); i++) {
+    for (auto i = 0u; i < points.size(); i++) {
       // int color_val = i*255/points.size();
       // int val_color = points.size()*255/i;
       // SDL_SetRenderDrawColor(renderer, color_val, color_val, color_val, 255);

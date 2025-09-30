@@ -110,7 +110,7 @@ void RandomWalk::render_test_walk(SDL_Event event, SDL_Window* window, SDL_Rende
     }
 
     // draw random walk points
-    for (int i = 0; i < points.size(); i++) {
+    for (auto i = 0u; i < points.size(); i++) {
       // int color_val = i*255/points.size();
       // int val_color = points.size()*255/i;
       // SDL_SetRenderDrawColor(renderer, color_val, color_val, color_val, 255);
