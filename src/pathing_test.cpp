@@ -6,7 +6,7 @@
 #include <ctime>
 #include <SDL2/SDL.h>
 
-// basically a smoothing operator
+// angle testing
 double RandomWalk::random_angle_test(std::vector<std::vector<double>> vec) {
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -22,7 +22,7 @@ double RandomWalk::random_angle_test(std::vector<std::vector<double>> vec) {
   return random_theta;
 }
 
-// Self-avoiding logic. When a new node is calculated, intersection is checked for all previous segments.
+// random walk pathing constraint testing
 std::vector<std::vector<int>> RandomWalk::test_walk(SDL_Window* window) {
   int windowWidth, windowHeight;
   SDL_GetWindowSize(window, &windowWidth, &windowHeight);
@@ -35,98 +35,16 @@ std::vector<std::vector<int>> RandomWalk::test_walk(SDL_Window* window) {
   std::vector<std::vector<double>> coordinates; // double vector for storing raw math values
   std::vector<std::vector<int>> points;
   for (int iter = 0; iter < number_of_steps; iter++) {
-    double theta = random_pair();
+    double theta = random_angle_test(coordinates);
     double x = prev_x + segment_length*cos(theta);
     double y = prev_y + segment_length*sin(theta);
     double r = sqrt(x*x + y*y);
-    bool self_avoided = false;
-    bool stuck = false; // flag for convergence, segment is too tightly wound
-    int stuck_limit = 1000000; // limit for number of trials before concluding that segment is stuck
     // constrain added points to the circle boundary
-    while (r >= radius && iter >= 0 && iter <= 2) {
-      theta = random_pair();
+    while (r >= radius) {
+      theta = random_angle_test(coordinates);
       x = prev_x + segment_length*cos(theta);
       y = prev_y + segment_length*sin(theta);
       r = sqrt(x*x + y*y);
-    }
-    // constrain added points by the self-avoiding intersection condition
-    if (iter > 2) {
-      int fails = 0;
-      while (self_avoided == false) {
-	// constrain added points to the circle boundary
-	while (r >= radius) {
-	  theta = random_angle_directed(coordinates);
-	  x = prev_x + segment_length*cos(theta);
-	  y = prev_y + segment_length*sin(theta);
-	  r = sqrt(x*x + y*y);
-	}
-
-	// handle vertical segments
-	bool cur_vertical = (x == prev_x);
-	// slope and intercept
-	double cur_A = cur_vertical ? 0.0 : (y - prev_y)/(x - prev_x);
-	double cur_B = prev_y - cur_A*prev_x;
-	for (int k = 0; k < iter - 1; k++) {
-	  double test_x1 = coordinates[k][0];
-	  double test_y1 = coordinates[k][1];
-	  double test_x2 = coordinates[k+1][0];
-	  double test_y2 = coordinates[k+1][1];
-
-	  // handle vertical segments safely
-	  bool test_vertical = (test_x1 == test_x2);
-
-	  // slope and intercept
-	  double test_A = test_vertical ? 0.0 : (test_y2 - test_y1)/(test_x2 - test_x1);
-	  double test_B = test_y1 - test_A*test_x1;
-	
-	  // if slopes are equal, skip (parallel lines)
-	  if (!cur_vertical && !test_vertical && fabs(test_A - cur_A) < 1e-9) {
-	    self_avoided = true;
-	    continue;
-	  }
-
-	  // calculate intersection point
-	  double intersection_x, intersection_y;
-	  if (cur_vertical) {
-	      intersection_x = x;
-	      intersection_y = test_A * x + test_B;
-	  } else if (test_vertical) {
-	      intersection_x = test_x1;
-	      intersection_y = cur_A * intersection_x + cur_B;
-	  } else {
-	      intersection_x = (cur_B - test_B)/(test_A - cur_A);
-	      intersection_y = cur_A * intersection_x + cur_B;
-	  }
-
-	  // check if intersection lies within both segments
-	  if (intersection_x >= std::min(test_x1,test_x2) &&
-	      intersection_x <= std::max(test_x1,test_x2) &&
-	      intersection_y >= std::min(test_y1,test_y2) &&
-	      intersection_y <= std::max(test_y1,test_y2)) {
-	      self_avoided = false;
-	      break;
-	  } else {
-	    self_avoided = true;
-	  }
-	}
-	if (self_avoided == false) {
-	  theta = random_angle_directed(coordinates);
-	  x = prev_x + segment_length*cos(theta);
-	  y = prev_y + segment_length*sin(theta);
-	  r = sqrt(x*x + y*y);
-	  fails++;
-	  if (fails == stuck_limit) {
-	    stuck = true;
-	  }
-	}
-	if (stuck == true) {
-	  break;
-	}
-       }
-     }
-
-    if (stuck == true) {
-      break;
     }
     // convert points to screen coordinates
     int i = static_cast<int>(x + centerX);
@@ -150,7 +68,7 @@ void RandomWalk::render_test_walk(SDL_Event event, SDL_Window* window, SDL_Rende
   int centerX = windowWidth/2;
   int centerY = windowHeight/2;
 
-  std::vector<std::vector<int>> points = self_avoiding_walk(window);
+  std::vector<std::vector<int>> points = test_walk(window);
 
   bool running = true;
 
@@ -161,9 +79,7 @@ void RandomWalk::render_test_walk(SDL_Event event, SDL_Window* window, SDL_Rende
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-
     SDL_RenderDrawPoint(renderer, centerX, centerY);
     
     // draw circle boundary
